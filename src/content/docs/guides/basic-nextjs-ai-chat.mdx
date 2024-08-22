@@ -6,7 +6,7 @@ import { Steps } from '@astrojs/starlight/components';
 
 <Steps>
 1. ### Create a new Next.js project
-    Next.js recommends [starting a new Next.js](https://nextjs.org/docs/getting-started/installation) app using create-next-app, which sets up everything automatically for you. To create a project, run:
+    Next.js recommends <a href="https://nextjs.org/docs/getting-started/installation" target="_blank">starting a new Next.js</a> app using `create-next-app`, which sets up everything automatically for you. To create a project, run:
 
     ```shell
     npx create-next-app@latest
@@ -15,7 +15,7 @@ import { Steps } from '@astrojs/starlight/components';
     Accept all the defaults.
 
 2. ### Environment Variables
-    Create `.env.local` file in the root of your project and add the following environment variables:
+    Create `.env.local` file in the root of your project and add the following variables:
 
 
     ```text title=".env.local"
@@ -25,9 +25,9 @@ import { Steps } from '@astrojs/starlight/components';
     INVSY_PROJECT_ID=xxxxxx
    ```
 
-    Get your secret key and project ID from the [Invsy dashboard](https://dash.invsy.com)
+    Get your Invsy secret key and project ID from the <a href="https://dash.invsy.com" target="_blank">Invsy dashboard</a>
 
-3. ### Create the Invsy instance
+3. ### Install & create the Invsy instance
     Install the `invsy` SDK by running:
     ```shell
     npm add invsy
@@ -39,7 +39,7 @@ import { Steps } from '@astrojs/starlight/components';
     // add your own auth logic
     export const user = 'user1'
 
-    export const invsy = new InvsyServer(
+    export const invsy = new Invsy(
       process.env.INVSY_API_KEY!,
       process.env.INVSY_PROJECT_ID!,
       user
@@ -49,12 +49,12 @@ import { Steps } from '@astrojs/starlight/components';
 4. ### Update the root page
     Replace the contents of `./src/page.tsx` with the following code:
     ```ts title="page.tsx"
-    import {invsy} from "@/lib/invsy";
-    import {redirect} from "next/navigation";
+    import { invsy } from "@/lib/invsy";
+    import { redirect } from "next/navigation";
 
     export default async function Page() {
       // create new chat and returns the chat id
-      const {id} = await invsy.new({
+      const { id } = await invsy.new({
         title: 'new chat'
       })
 
@@ -167,3 +167,5 @@ import { Steps } from '@astrojs/starlight/components';
     }
     ```
 </Steps>
+
+**Congradulations!** You have successfully created a basic AI chat app using Next.js and Invsy. You can now customize the chat UI and add more features to your app.
