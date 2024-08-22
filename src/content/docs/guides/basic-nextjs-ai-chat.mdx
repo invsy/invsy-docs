@@ -1,0 +1,169 @@
+---
+title: Basic Next.js AI Chat
+description: A guide in my new Starlight docs site.
+---
+import { Steps } from '@astrojs/starlight/components';
+
+<Steps>
+1. ### Create a new Next.js project
+    Next.js recommends [starting a new Next.js](https://nextjs.org/docs/getting-started/installation) app using create-next-app, which sets up everything automatically for you. To create a project, run:
+
+    ```shell
+    npx create-next-app@latest
+    ```
+
+    Accept all the defaults.
+
+2. ### Environment Variables
+    Create `.env.local` file in the root of your project and add the following environment variables:
+
+
+    ```text title=".env.local"
+    OPENAI_API_KEY=xxxxxx
+
+    INVSY_API_KEY=xxxxxx
+    INVSY_PROJECT_ID=xxxxxx
+   ```
+
+    Get your secret key and project ID from the [Invsy dashboard](https://dash.invsy.com)
+
+3. ### Create the Invsy instance
+    Install the `invsy` SDK by running:
+    ```shell
+    npm add invsy
+    ```
+
+    Then create the Invsy instance in a new file `./src/libs/invsy.ts`:
+    ```ts title="libs/invsy.ts"
+    import { Invsy } from "invsy"
+    // add your own auth logic
+    export const user = 'user1'
+
+    export const invsy = new InvsyServer(
+      process.env.INVSY_API_KEY!,
+      process.env.INVSY_PROJECT_ID!,
+      user
+    )
+    ```
+
+4. ### Update the root page
+    Replace the contents of `./src/page.tsx` with the following code:
+    ```ts title="page.tsx"
+    import {invsy} from "@/lib/invsy";
+    import {redirect} from "next/navigation";
+
+    export default async function Page() {
+      // create new chat and returns the chat id
+      const {id} = await invsy.new({
+        title: 'new chat'
+      })
+
+      redirect(`/${id}`)
+    }
+    ```
+
+    Serve your app by running:
+    ```shell
+    npm run dev
+    ```
+
+    When you visit root of your site, it will create a new chat and redirect to the chat page which doesnt exist yet... Let's create it next.
+
+5. ### Create the chat page
+    Create a new file `./src/[chat_id]/page.tsx` and add the following code:
+    ```tsx title="[chat_id]/page.tsx"
+    import { ChatUi } from "@/components/chat-ui";
+    import { invsy } from "@/lib/invsy";
+
+    type Props = {
+      params: {
+        chat_id: string;
+      };
+    }
+
+    export default async function ChatPage({params}: Props) {
+      const chatId = params.chat_id
+      const chat = await invsy.get(chatId);
+
+      return (
+        <>
+          <ChatUi chat={chat}/>
+        </>
+      );
+    }
+    ```
+
+6. ### Create the `ChatUI` component
+    Create a new file `./src/components/chat-ui.tsx` and add the following code:
+    ```tsx title="components/chat-ui.tsx"
+    "use client"
+    import { useChat } from "ai/react";
+
+    type Props = {
+      chat: any
+    }
+
+    export const ChatUi = ({ chat }: Props) => {
+    const { messages, input, handleInputChange, handleSubmit } = useChat({
+      api: `/api/chat/${chat.id}`,
+        keepLastMessageOnError: true,
+        initialMessages: chat.messages ? chat.messages : []
+      });
+
+      return (
+        <>
+          {messages.map((message, index) => (
+            <div key={index}>
+              {message.role === 'user' ? 'User: ' : 'AI: '}
+              {message.content}
+            </div>
+          ))}
+
+          <form onSubmit={handleSubmit}>
+            <input name="prompt" value={input} onChange={handleInputChange} />
+            <button type="submit">Submit</button>
+          </form>
+        </>
+      );
+    }
+    ```
+
+7. ### Create the chat API
+    Create a new file `./src/api/chat/[chat_id]/index.ts` and add the following code:
+    ```tsx title="api/chat/[chat_id]/index.ts"
+    import { openai } from '@ai-sdk/openai';
+    import { convertToCoreMessages, streamText } from 'ai';
+    import { invsy } from "@/lib/invsy";
+    import { user } from "@/lib/user";
+
+    // Allow streaming responses up to 30 seconds
+    export const maxDuration = 30;
+
+    export async function POST(req: Request, { params }: { params: { chat_id: string } }) {
+        const { messages } = await req.json();
+
+        const result = await streamText({
+            model: openai('gpt-4-turbo'),
+            system: 'You are a helpful assistant.',
+            messages: convertToCoreMessages(messages),
+            // You can determine message role by checking toolCalls, toolResults etc.
+            async onFinish({ text, toolCalls, toolResults }) {
+                messages.push({
+                    role: 'assistant',
+                    content: text
+                })
+
+                // implement storage logic:
+                await invsy.save({
+                    id: params.chat_id,
+                    user_id: user,
+                    messages,
+                    meta: {},
+                });
+            },
+        });
+
+        return result.toDataStreamResponse();
+    }
+    ```
+</Steps>

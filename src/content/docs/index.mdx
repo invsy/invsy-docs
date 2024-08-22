@@ -1,36 +1,99 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
-template: splash
-hero:
-  tagline: Congrats on setting up a new Starlight project!
-  image:
-    file: ../../assets/houston.webp
-  actions:
-    - text: Example Guide
-      link: /guides/example/
-      icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
-      icon: external
-      variant: minimal
+title: Getting started
+description: This guide will instruct you through setting up Invsy in your project.
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components'
+import { Steps } from '@astrojs/starlight/components';
 
-## Next steps
+The Invsy SDK is designed to be a predictable and intuitive interface for interacting with the [Invsy API](https://api.invsy.com/ui). This guide will instruct you through setting up Invsy, creating and storing a chat.
 
-<CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
-</CardGrid>
+<br />
+
+<Steps>
+
+    1. ## Installation
+        You can install the SDK with npm, pnpm, yarn or bun.
+        <Tabs>
+
+            <TabItem label="npm" icon="seti:npm">
+                ```sh
+                npm add invsy
+                ```
+            </TabItem>
+
+            <TabItem label="pnpm" icon="pnpm">
+                ```sh
+                pnpm add invsy
+                ```
+            </TabItem>
+
+            <TabItem label="Yarn" icon="seti:yarn">
+                ```sh
+                yarn add invsy
+                ```
+            </TabItem>
+
+        </Tabs>
+        <br />
+        <br />
+
+    2. ## Create client
+        To begin, import the [Invsy class](/invsy-client). You can create a reusable client by defining a const/function that takes environment variables as input and returns a new instance of the Invsy class. This approach encapsulates the client logic and makes it easy to reuse across your application.
+
+        Check out the guides on using [environment variables](/guides) for different frameworks.
+
+        ```ts
+        import { Invsy } from 'invsy'
+
+        export const invsy = new Invsy(
+          'INVSY_API_KEY',
+          'INVSY_PROJECT_ID',
+          'USER_ID'
+        );
+        ```
+        <br />
+        <br />
+
+    3. ## Create a chat
+        To [create a chat](/chats/create), you can use the `create` method. This method takes optional chat meta as input and returns a promise that resolves to the created chat object.
+
+        ```ts
+        const chat = await invsy.create({
+          title: 'My first chat'
+        });
+        ```
+        <br />
+        <br />
+
+    4. ## Save the chat
+        To [save the chat](/chats/save), you can use the `save` method. This method takes a chat object as input and returns a promise that resolves to the stored chat object.
+        ```ts
+        const messages = [
+          {
+            content: 'Hello, world!'
+          }
+        ]
+        // Update meta title, use the first message as the chat title
+        const title = chat.messages[0].content.substring(0, 100);
+
+        const chat = await invsy.save({
+          meta: {
+            title
+          },
+          messages
+        });
+        ```
+        <br />
+
+    5. ## Get a chat
+        To [get a chat](/chats/get), you can use the `get` method. This method takes a chat ID as input and returns a promise that resolves to the chat object.
+
+        ```ts
+        const chat = await invsy.get(chat.id);
+        ```
+</Steps>
+
+## Further reading
+
+- Read [about how-to guides](https://diataxis.fr/how-to-guides/) in the Diátaxis framework
