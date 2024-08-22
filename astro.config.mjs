@@ -19,7 +19,6 @@ export default defineConfig({
 				{
 					label: 'Guides',
 					items: [
-						{ label: 'Overview', slug: 'guides' },
 						{ label: 'Basic Next.js AI chat', slug: 'guides/basic-nextjs-ai-chat' },
 					],
 				},
