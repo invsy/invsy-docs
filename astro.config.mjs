@@ -16,10 +16,17 @@ export default defineConfig({
 			},
 			sidebar: [
 				{ label: 'Getting started', slug: '' },
-				{ label: 'Client', slug: 'invsy-client' },
 				{
-					label: 'Chats',
+					label: 'Guides',
 					items: [
+						{ label: 'Overview', slug: 'guides' },
+						{ label: 'Basic Next.js AI chat', slug: 'guides/basic-nextjs-ai-chat' },
+					],
+				},
+				{
+					label: 'SDK',
+					items: [
+						{ label: 'Client', slug: 'invsy-client' },
 						{ label: 'Create', slug: 'chats/create' },
 						{ label: 'Get', slug: 'chats/get' },
 						{ label: 'List', slug: 'chats/list' },
@@ -29,12 +36,10 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Guides',
+					label: 'Snippets',
 					items: [
-						{ label: 'Overview', slug: 'guides' },
-						{ label: 'Basic Next.js AI chat', slug: 'guides/basic-nextjs-ai-chat' },
-						{ label: 'Next.js with Clerk', slug: 'guides/nextjs-with-clerk' },
-						{ label: 'Cloudflare Worker', slug: 'guides/cloudflare-worker' },
+						{ label: 'Next.js with Clerk', slug: 'snippets/nextjs-with-clerk' },
+						{ label: 'Cloudflare Worker', slug: 'snippets/cloudflare-worker' },
 					],
 				},
 				{

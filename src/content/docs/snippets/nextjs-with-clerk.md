@@ -3,7 +3,9 @@ title: Example Guide
 description: A guide in my new Starlight docs site.
 ---
 
-```ts title="Example using Next.js .env and Clerk"
+Example using Next.js .env and Clerk
+
+```ts
 import { auth } from '@clerk/nextjs/server'
 import { Invsy } from 'invsy'
 
