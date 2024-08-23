@@ -5,6 +5,15 @@ description: A guide in my new Starlight docs site.
 
 import { Tabs, TabItem } from '@astrojs/starlight/components'
 import { Steps } from '@astrojs/starlight/components';
+import { Code } from '@astrojs/starlight/components';
+
+import invsyClient from '../../../../fixtures/basic-nextjs-ai-chat/src/libs/invsy.js?raw';
+import rootPage from '../../../../fixtures/basic-nextjs-ai-chat/src/app/page.js?raw';
+import chatUi from '../../../../fixtures/basic-nextjs-ai-chat/src/components/chat-ui.js?raw';
+import chatPage from '../../../../fixtures/basic-nextjs-ai-chat/src/app/[chat_id]/page.js?raw';
+import chatApi from '../../../../fixtures/basic-nextjs-ai-chat/src/app/api/chat/[chat_id]/route.js?raw';
+
+*Want to view the full code? Check out the <a href="https://github.com/invsy/invsy-docs/tree/main/fixtures/basic-nextjs-ai-chat" target="_blank">basic-nextjs-ai-chat</a> repository on GitHub.*
 
 <Steps>
 1. ### Create a new Next.js project
@@ -56,131 +65,26 @@ import { Steps } from '@astrojs/starlight/components';
 
 
     Then create the Invsy instance in a new file `./src/libs/invsy.ts`:
-    ```ts
-    import { Invsy } from "invsy"
-    // add your own auth logic
-    export const userId = 'user1'
-
-    export const invsy = new Invsy(
-      process.env.INVSY_API_KEY!,
-      process.env.INVSY_PROJECT_ID!,
-      userId
-    )
-    ```
+    <Code code={invsyClient} lang="ts" />
 
 4. ### Update the root page
     Replace the contents of `./src/page.tsx` with the following code:
-    ```ts
-    import { invsy } from "@/libs/invsy";
-    import { redirect } from "next/navigation";
-
-    export default async function Page() {
-      // create new chat and returns the chat id
-      const { id } = await invsy.create({
-        title: 'new chat'
-      })
-
-      redirect(`/${id}`)
-    }
-    ```
+    <Code code={rootPage} lang="ts" />
 
 5. ### Create the `ChatUI` component
-    Create a new file `./src/components/chat-ui.tsx` and add the following code:
-    ```tsx
-    "use client"
-    import { useChat } from "ai/react";
-
-    type Props = {
-      chat: any
-    }
-
-    export const ChatUi = ({ chat }: Props) => {
-      const { messages, input, handleInputChange, handleSubmit } = useChat({
-          api: `/api/chat/${chat.id}`,
-          keepLastMessageOnError: true,
-          initialMessages: chat.messages ? chat.messages : []
-      });
-
-      return (
-        <>
-          {messages.map((message, index) => (
-            <div key={index}>
-              {message.role === 'user' ? 'User: ' : 'AI: '}
-                {message.content}
-            </div>
-          ))}
-
-          <form onSubmit={handleSubmit}>
-            <input name="prompt" value={input} onChange={handleInputChange} />
-            <button type="submit">Submit</button>
-          </form>
-        </>
-      );
-    }
-    ```
+    <Code code={chatUi} lang="ts" />
 
 6. ### Create the chat page
     Create a new file `./src/app/[chat_id]/page.tsx` and add the following code:
-    ```tsx
-    import { ChatUi } from "@/components/chat-ui";
-    import { invsy } from "@/libs/invsy";
-
-    type Props = {
-      params: {
-        chat_id: string;
-      };
-    }
-
-    export default async function ChatPage({params}: Props) {
-      const chatId = params.chat_id
-      const chat = await invsy.get(chatId);
-
-      return (
-        <>
-          <ChatUi chat={chat}/>
-        </>
-      );
-    }
-    ```
+    <Code code={chatPage} lang="ts" />
 
 7. ### Create the chat API
     Create a new file `./src/app/api/chat/[chat_id]/route.ts` and add the following code:
-    ```tsx
-    import { openai } from '@ai-sdk/openai';
-    import { convertToCoreMessages, streamText } from 'ai';
-    import { invsy } from "@/libs/invsy";
-
-    // Allow streaming responses up to 30 seconds
-    export const maxDuration = 30;
-
-    export async function POST(req: Request, { params }: { params: { chat_id: string } }) {
-        const { messages } = await req.json();
-
-        const result = await streamText({
-            model: openai('gpt-4-turbo'),
-            system: 'You are a helpful assistant.',
-            messages: convertToCoreMessages(messages),
-            // You can determine message role by checking toolCalls, toolResults etc.
-            async onFinish({ text, toolCalls, toolResults }) {
-                messages.push({
-                    role: 'assistant',
-                    content: text
-                })
-
-                // implement storage logic:
-                await invsy.save({
-                    id: params.chat_id,
-                    messages,
-                    meta: {},
-                });
-            },
-        });
-
-        return result.toDataStreamResponse();
-    }
-    ```
+    <Code code={chatApi} lang="ts" />
 </Steps>
 
-Serve up your app by running `npm run dev` and navigate to `http://localhost:3000` in your browser.
+Run `npm run dev` and navigate to `http://localhost:3000` in your browser. Add a prompt in the input field and click submit. You should see the AI response in the chat window.
+
+Refresh the page and you should see the chat history!
 
 **Congradulations!** You have successfully created a basic AI chat app using Next.js and Invsy. You can now customize the chat UI and add more features to your app.
