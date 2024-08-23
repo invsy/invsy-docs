@@ -2,6 +2,8 @@
 title: Basic Next.js AI Chat
 description: A guide in my new Starlight docs site.
 ---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components'
 import { Steps } from '@astrojs/starlight/components';
 
 <Steps>
@@ -18,7 +20,7 @@ import { Steps } from '@astrojs/starlight/components';
     Create `.env.local` file in the root of your project and add the following variables:
 
 
-    ```text title=".env.local"
+    ```text
     OPENAI_API_KEY=xxxxxx
 
     INVSY_API_KEY=xxxxxx
@@ -27,34 +29,54 @@ import { Steps } from '@astrojs/starlight/components';
 
     Get your Invsy secret key and project ID from the <a href="https://dash.invsy.com" target="_blank">Invsy dashboard</a>
 
-3. ### Install & create the Invsy instance
-    Install the `invsy` SDK by running:
-    ```shell
-    npm add invsy
-    ```
+3. ### Install packages & create the Invsy instance
+    Install the `invsy`, `ai` and `@ai-sdk/openai` SDKs by running:
+
+    <Tabs>
+
+        <TabItem label="npm" icon="seti:npm">
+            ```sh
+            npm add invsy ai @ai-sdk/openai
+            ```
+        </TabItem>
+
+        <TabItem label="pnpm" icon="pnpm">
+            ```sh
+            pnpm add invsy ai @ai-sdk/openai
+            ```
+        </TabItem>
+
+        <TabItem label="Yarn" icon="seti:yarn">
+            ```sh
+            yarn add invsy ai @ai-sdk/openai
+            ```
+        </TabItem>
+
+    </Tabs>
+
 
     Then create the Invsy instance in a new file `./src/libs/invsy.ts`:
-    ```ts title="libs/invsy.ts"
+    ```ts
     import { Invsy } from "invsy"
     // add your own auth logic
-    export const user = 'user1'
+    export const userId = 'user1'
 
     export const invsy = new Invsy(
       process.env.INVSY_API_KEY!,
       process.env.INVSY_PROJECT_ID!,
-      user
+      userId
     )
     ```
 
 4. ### Update the root page
     Replace the contents of `./src/page.tsx` with the following code:
-    ```ts title="page.tsx"
-    import { invsy } from "@/lib/invsy";
+    ```ts
+    import { invsy } from "@/libs/invsy";
     import { redirect } from "next/navigation";
 
     export default async function Page() {
       // create new chat and returns the chat id
-      const { id } = await invsy.new({
+      const { id } = await invsy.create({
         title: 'new chat'
       })
 
@@ -62,16 +84,44 @@ import { Steps } from '@astrojs/starlight/components';
     }
     ```
 
-    Serve your app by running:
-    ```shell
-    npm run dev
+5. ### Create the `ChatUI` component
+    Create a new file `./src/components/chat-ui.tsx` and add the following code:
+    ```tsx
+    "use client"
+    import { useChat } from "ai/react";
+
+    type Props = {
+      chat: any
+    }
+
+    export const ChatUi = ({ chat }: Props) => {
+      const { messages, input, handleInputChange, handleSubmit } = useChat({
+          api: `/api/chat/${chat.id}`,
+          keepLastMessageOnError: true,
+          initialMessages: chat.messages ? chat.messages : []
+      });
+
+      return (
+        <>
+          {messages.map((message, index) => (
+            <div key={index}>
+              {message.role === 'user' ? 'User: ' : 'AI: '}
+                {message.content}
+            </div>
+          ))}
+
+          <form onSubmit={handleSubmit}>
+            <input name="prompt" value={input} onChange={handleInputChange} />
+            <button type="submit">Submit</button>
+          </form>
+        </>
+      );
+    }
     ```
 
-    When you visit root of your site, it will create a new chat and redirect to the chat page which doesnt exist yet... Let's create it next.
-
-5. ### Create the chat page
-    Create a new file `./src/[chat_id]/page.tsx` and add the following code:
-    ```tsx title="[chat_id]/page.tsx"
+6. ### Create the chat page
+    Create a new file `./src/app/[chat_id]/page.tsx` and add the following code:
+    ```tsx
     import { ChatUi } from "@/components/chat-ui";
     import { invsy } from "@/lib/invsy";
 
@@ -93,48 +143,12 @@ import { Steps } from '@astrojs/starlight/components';
     }
     ```
 
-6. ### Create the `ChatUI` component
-    Create a new file `./src/components/chat-ui.tsx` and add the following code:
-    ```tsx title="components/chat-ui.tsx"
-    "use client"
-    import { useChat } from "ai/react";
-
-    type Props = {
-      chat: any
-    }
-
-    export const ChatUi = ({ chat }: Props) => {
-    const { messages, input, handleInputChange, handleSubmit } = useChat({
-      api: `/api/chat/${chat.id}`,
-        keepLastMessageOnError: true,
-        initialMessages: chat.messages ? chat.messages : []
-      });
-
-      return (
-        <>
-          {messages.map((message, index) => (
-            <div key={index}>
-              {message.role === 'user' ? 'User: ' : 'AI: '}
-              {message.content}
-            </div>
-          ))}
-
-          <form onSubmit={handleSubmit}>
-            <input name="prompt" value={input} onChange={handleInputChange} />
-            <button type="submit">Submit</button>
-          </form>
-        </>
-      );
-    }
-    ```
-
 7. ### Create the chat API
-    Create a new file `./src/api/chat/[chat_id]/index.ts` and add the following code:
-    ```tsx title="api/chat/[chat_id]/index.ts"
+    Create a new file `./src/app/api/chat/[chat_id]/route.ts` and add the following code:
+    ```tsx
     import { openai } from '@ai-sdk/openai';
     import { convertToCoreMessages, streamText } from 'ai';
-    import { invsy } from "@/lib/invsy";
-    import { user } from "@/lib/user";
+    import { invsy } from "@/libs/invsy";
 
     // Allow streaming responses up to 30 seconds
     export const maxDuration = 30;
@@ -156,7 +170,6 @@ import { Steps } from '@astrojs/starlight/components';
                 // implement storage logic:
                 await invsy.save({
                     id: params.chat_id,
-                    user_id: user,
                     messages,
                     meta: {},
                 });
@@ -167,5 +180,7 @@ import { Steps } from '@astrojs/starlight/components';
     }
     ```
 </Steps>
+
+Serve up your app by running `npm run dev` and navigate to `http://localhost:3000` in your browser.
 
 **Congradulations!** You have successfully created a basic AI chat app using Next.js and Invsy. You can now customize the chat UI and add more features to your app.

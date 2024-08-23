@@ -25,7 +25,7 @@ export default defineConfig({
 				{
 					label: 'SDK',
 					items: [
-						{ label: 'Client', slug: 'invsy-client' },
+						{ label: 'Client', slug: 'chats/invsy-client' },
 						{ label: 'Create', slug: 'chats/create' },
 						{ label: 'Get', slug: 'chats/get' },
 						{ label: 'List', slug: 'chats/list' },
