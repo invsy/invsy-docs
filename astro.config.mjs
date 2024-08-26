@@ -40,11 +40,7 @@ export default defineConfig({
 						{ label: 'Next.js with Clerk', slug: 'snippets/nextjs-with-clerk' },
 						{ label: 'Cloudflare Worker', slug: 'snippets/cloudflare-worker' },
 					],
-				},
-				{
-					label: 'Reference',
-					autogenerate: { directory: 'reference' },
-				},
+				}
 			],
 		}),
 	],
