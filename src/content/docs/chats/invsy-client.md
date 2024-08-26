@@ -3,17 +3,12 @@ title: Invsy client
 description: This guide will instruct you through setting up Invsy in your project.
 ---
 
+import { Code } from '@astrojs/starlight/components';
+import snippetsCoreInvsyClient from '../../../fixtures/snippets/core/create-client.ts?raw';
+
 The Invsy client is a JavaScript library that allows you to interact with the Invsy API. This guide will instruct you through setting up Invsy in your project.
 
-```ts
-import { Invsy } from 'invsy'
-
-export const invsy = new Invsy(
-  'INVSY_API_KEY', // Get you API key from the Invsy dashboard
-  'INVSY_PROJECT_ID', // Get your project ID from the Invsy dashboard
-  'USER_ID' // Your users authenticated user ID
-);
-```
+<Code code={snippetsCoreInvsyClient} lang="ts" />
 
 ### Parameters
 - `token`: The API token for authentication. This is required to authenticate your requests to the Invsy API.

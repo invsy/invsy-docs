@@ -3,14 +3,12 @@ title: Create a chat
 description: A guide in my new Starlight docs site.
 ---
 
+import { Code } from '@astrojs/starlight/components';
+import snippetsCoreCreateChat from '../../../../fixtures/snippets/core/create-chat.ts?raw';
+
 The `create` function allows you to create a new chat for the current user. You can optionally provide metadata for the chat.
 
-```javascript
-const chat = await invsy.create({
-    title: 'My first chat',
-    additional_info: 'This is a chat about cats'
-})
-```
+<Code code={snippetsCoreCreateChat} lang="ts" />
 
 ## Further reading
 

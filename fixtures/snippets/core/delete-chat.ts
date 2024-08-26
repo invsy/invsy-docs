@@ -1,0 +1,1 @@
+await invsy.delete('CHAT_ID');
