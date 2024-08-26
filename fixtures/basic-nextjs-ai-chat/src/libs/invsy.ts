@@ -1,6 +1,6 @@
 import { Invsy } from "invsy"
 
-// add your own auth logic
+// Add your own auth logic
 export const userId = "user1"
 
 export const invsy = new Invsy({

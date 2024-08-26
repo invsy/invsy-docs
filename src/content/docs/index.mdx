@@ -5,6 +5,12 @@ description: This guide will instruct you through setting up Invsy in your proje
 
 import { Tabs, TabItem } from '@astrojs/starlight/components'
 import { Steps } from '@astrojs/starlight/components';
+import { Code } from '@astrojs/starlight/components';
+
+import snippetsCoreInvsyClient from '../../../../fixtures/snippets/core/create-client.ts?raw';
+import snippetsCoreCreateChat from '../../../../fixtures/snippets/core/create-chat.ts?raw';
+import snippetsCoreSaveChat from '../../../../fixtures/snippets/core/save-chat.ts?raw';
+import snippetsCoreGetChat from '../../../../fixtures/snippets/core/get-chat.ts?raw';
 
 The Invsy SDK provides a predictable and intuitive interface for interacting with the [Invsy API](https://api.invsy.com/ui). This guide will instruct you through setting up Invsy, creating and storing a chat.
 
@@ -43,55 +49,21 @@ The Invsy SDK provides a predictable and intuitive interface for interacting wit
 
         Check out the guides on using [environment variables](/guides) for different frameworks.
 
-        ```ts
-        import { Invsy } from 'invsy'
-
-        export const invsy = new Invsy(
-          'INVSY_API_KEY',
-          'INVSY_PROJECT_ID',
-          'USER_ID'
-        );
-        ```
-        <br />
-        <br />
+        <Code code={snippetsCoreInvsyClient} lang="ts" />
 
     3. ## Create a chat
         To [create a chat](/chats/create), you can use the `create` method. This method takes optional chat meta as input and returns a promise that resolves to the created chat object.
 
-        ```ts
-        const chat = await invsy.create({
-          title: 'My first chat'
-        });
-        ```
-        <br />
-        <br />
+        <Code code={snippetsCoreCreateChat} lang="ts" />
 
     4. ## Save the chat
         To [save the chat](/chats/save), you can use the `save` method. This method takes a chat object as input and returns a promise that resolves to the stored chat object.
-        ```ts
-        const messages = [
-          {
-            content: 'Hello, world!'
-          }
-        ]
-        // Update meta title, use the first message as the chat title
-        const title = chat.messages[0].content.substring(0, 100);
-
-        const chat = await invsy.save({
-          meta: {
-            title
-          },
-          messages
-        });
-        ```
-        <br />
+        <Code code={snippetsCoreSaveChat} lang="ts" />
 
     5. ## Get a chat
         To [get a chat](/chats/get), you can use the `get` method. This method takes a chat ID as input and returns a promise that resolves to the chat object.
 
-        ```ts
-        const chat = await invsy.get(chat.id);
-        ```
+        <Code code={snippetsCoreGetChat} lang="ts" />
 </Steps>
 
 ## Further reading
